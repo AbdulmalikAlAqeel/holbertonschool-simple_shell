@@ -11,7 +11,7 @@ int main(void)
 {
 pid_t my_pid;
 int error;
-int status, i = 0;
+int i = 0;
 ssize_t read;
 char *argv[64];
 char *token;
