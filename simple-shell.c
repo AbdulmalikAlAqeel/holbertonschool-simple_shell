@@ -8,11 +8,9 @@
 
 /**
  * main - entry point
- * @ac: int
- * @av: char
  * Return: always (0) success
  */
-int main(int ac, char **av)
+int main()
 {
 pid_t pid;
 ssize_t read;
