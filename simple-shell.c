@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+char *find_in_path(char *cmd);
 
 /**
  * main - entry point
@@ -56,14 +57,10 @@ continue;
 pid = fork();
 if (pid == 0)
 {
-if (argv[0][0] != '/')
+if (argv[0][0] != '/' && argv[0][0] != '.')
 {
-if (argv[0][0] != '.')
-{
-strcpy(full_path, "/bin/");
-strcat(full_path,argv[0]);
-argv[0] = full_path;
-}
+printf("yes");
+argv[0] = find_in_path(argv[0]);
 }
 execve(argv[0], argv, NULL);
 free(line);
@@ -78,4 +75,29 @@ if (WIFEXITED(status))
 }
 free(line);
 return (exit_status);
+}
+
+
+char *find_in_path(char *cmd)
+{
+    char *path = getenv("PATH");
+    char *copy = strdup(path);
+    char *dir = strtok(copy, ":");
+    char full[1024];
+
+    while (dir)
+    {
+        snprintf(full, sizeof(full), "%s/%s", dir, cmd);
+
+        if (access(full, X_OK) == 0)
+        {
+            free(copy);
+            return strdup(full);
+        }
+
+        dir = strtok(NULL, ":");
+    }
+
+    free(copy);
+    return NULL;
 }
