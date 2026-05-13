@@ -7,11 +7,10 @@
 
 
 /*
- * main - prints a string
- * @c : the character to be printed
- * return : nothing
+ * main - entry point
+ * Return: always (0) success
  */
-int main(void)
+int main()
 {
 pid_t pid;
 ssize_t read;
