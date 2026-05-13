@@ -49,7 +49,6 @@ token = strtok(NULL, " ");
 }
 argv[i] = NULL;
 execve(argv[0], argv, NULL);
-perror("./hsh");
 free(line);
 exit(127);
 }
