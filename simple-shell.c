@@ -21,7 +21,12 @@ while (true)
 {
 if (isatty(STDIN_FILENO))
 {
-printf("$ ");   
+printf("$ ");  
+read = getline(&line, &len, stdin);
+if (read == -1)
+{
+break;
+} 
 }
 read = getline(&line, &len, stdin);
 if (read == -1)
