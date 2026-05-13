@@ -19,7 +19,7 @@ char *line = NULL;
 size_t len = 0;
 while (true)
 {
-if (!isatty(STDIN_FILENO))
+if (isatty(STDIN_FILENO))
 {
 printf("$ ");   
 }
