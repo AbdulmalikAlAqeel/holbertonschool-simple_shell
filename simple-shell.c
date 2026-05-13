@@ -21,10 +21,12 @@ int main(void)
     int i;
     int exit_status = 0;
     char *line = NULL;
+    int line_num = 0;
 
     while (1)
     {
         i = 0;
+        line_num++;
         if (isatty(STDIN_FILENO))
         {
             printf("$ ");
@@ -55,6 +57,7 @@ int main(void)
             char *cmd_path = find_in_path(argv[0]);
             if (cmd_path == NULL)
             {
+                fprintf(stderr, "./hsh: %d: %s: not found\n", line_num, argv[0]);
                 exit_status = 127;
                 continue;
             }
@@ -64,6 +67,7 @@ int main(void)
         {
             if (access(argv[0], X_OK) != 0)
             {
+                fprintf(stderr, "./hsh: %d: %s: not found\n", line_num, argv[0]);
                 exit_status = 127;
                 continue;
             }
@@ -83,6 +87,7 @@ int main(void)
                 cmd_copy = find_in_path(argv[0]);
                 if (cmd_copy == NULL)
                 {
+                    fprintf(stderr, "./hsh: %d: %s: not found\n", line_num, argv[0]);
                     free(line);
                     exit(127);
                 }
