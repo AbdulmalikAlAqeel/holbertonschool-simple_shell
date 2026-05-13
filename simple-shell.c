@@ -26,6 +26,7 @@ char *line = NULL;
 
 while (1)
 {
+
 i = 0;
 if (isatty(STDIN_FILENO))
 {
@@ -57,9 +58,12 @@ if (pid == 0)
 {
 if (argv[0][0] != '/')
 {
+if (argv[0][0] != '.')
+{
 strcpy(full_path, "/bin/");
 strcat(full_path,argv[0]);
 argv[0] = full_path;
+}
 }
 execve(argv[0], argv, NULL);
 free(line);
