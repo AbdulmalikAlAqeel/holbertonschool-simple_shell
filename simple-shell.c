@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+/*
+ * main - prints a string
+ * @c : the character to be printed
+ * return : nothing
+ */
 int main(void)
 {
 pid_t pid;
