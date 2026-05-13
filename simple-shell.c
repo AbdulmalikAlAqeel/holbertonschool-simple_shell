@@ -19,48 +19,42 @@ char *line = NULL;
 size_t len = 0;
 while (true)
 {
+i = 0;
 if (isatty(STDIN_FILENO))
 {
-printf("$ ");  
-read = getline(&line, &len, stdin);
-if (read == -1)
-{
-break;
-} 
+printf("$ ");
 }
 read = getline(&line, &len, stdin);
 if (read == -1)
+{
+if (isatty(STDIN_FILENO))
 {
 printf("\n");
+}
 break;
 }
+line[strcspn(line, "\n")] = '\0';
 my_pid = fork();
 if (my_pid == 0)
 {
-line[strcspn(line, "\n")] = '\0';
 token = strtok(line, " ");
 while (token)
 {
-    argv[i++] = token;
-    token = strtok(NULL, " ");
+argv[i++] = token;
+token = strtok(NULL, " ");
 }
 argv[i] = NULL;
-if (strlen(line) > 1)
+if (argv[0])
 {
-error = execve(argv[0], argv, NULL);
-if (error == -1)
-{
+execve(argv[0], argv, NULL);
 printf("./shell: No such file or directory\n");
 }
-}
-break;
+exit(EXIT_FAILURE);
 }
 else
 {
-wait(NULL);
+    wait(NULL);
 }
-
 }
-free(line);
-return (0);
+return (1);
 }
