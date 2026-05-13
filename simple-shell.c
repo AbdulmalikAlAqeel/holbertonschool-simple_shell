@@ -58,7 +58,6 @@ if (pid == 0)
 {
 if (argv[0][0] != '/' && argv[0][0] != '.')
 {
-printf("yes");
 argv[0] = find_in_path(argv[0]);
 }
 execve(argv[0], argv, NULL);
