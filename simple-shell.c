@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *find_in_path(char *cmd);
+char *get_path(char **envp);
+char *find_in_path(char *cmd, char **envp);
 
 int main(int argc, char **argv_main, char **envp)
 {
@@ -28,23 +29,23 @@ int main(int argc, char **argv_main, char **envp)
         i = 0;
 
         if (isatty(STDIN_FILENO))
-            printf("$ ");
+            write(STDOUT_FILENO, "$ ", 2);
 
         read = getline(&line, &len, stdin);
         if (read == -1)
         {
             if (isatty(STDIN_FILENO))
-                printf("\n");
+                write(STDOUT_FILENO, "\n", 1);
             break;
         }
 
         line[strcspn(line, "\n")] = '\0';
 
-        token = strtok(line, " ");
+        token = strtok(line, " \t");
         while (token)
         {
             argv[i++] = token;
-            token = strtok(NULL, " ");
+            token = strtok(NULL, " \t");
         }
         argv[i] = NULL;
 
@@ -54,10 +55,15 @@ int main(int argc, char **argv_main, char **envp)
         if (strchr(argv[0], '/'))
         {
             cmd_path = argv[0];
+            if (access(cmd_path, X_OK) != 0)
+            {
+                exit_status = 127;
+                continue;
+            }
         }
         else
         {
-            cmd_path = find_in_path(argv[0]);
+            cmd_path = find_in_path(argv[0], envp);
             if (cmd_path == NULL)
             {
                 exit_status = 127;
@@ -87,14 +93,27 @@ int main(int argc, char **argv_main, char **envp)
     return (exit_status);
 }
 
-char *find_in_path(char *cmd)
+char *get_path(char **envp)
+{
+    int i = 0;
+
+    while (envp && envp[i])
+    {
+        if (strncmp(envp[i], "PATH=", 5) == 0)
+            return (envp[i] + 5);
+        i++;
+    }
+    return NULL;
+}
+
+char *find_in_path(char *cmd, char **envp)
 {
     char *path;
     char *copy;
     char *dir;
     char full[1024];
 
-    path = getenv("PATH");
+    path = get_path(envp);
     if (path == NULL || path[0] == '\0')
         return NULL;
 
