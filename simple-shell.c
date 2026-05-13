@@ -10,7 +10,6 @@
 int main(void)
 {
 pid_t my_pid;
-int error;
 int i = 0;
 ssize_t read;
 char *argv[64];
