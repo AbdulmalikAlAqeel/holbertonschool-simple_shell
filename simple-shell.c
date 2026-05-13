@@ -2,7 +2,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,13 +33,6 @@ printf("\n");
 break;
 }
 line[strcspn(line, "\n")] = '\0';
-if (strlen(line) == 0)
-{
-continue;
-}
-pid = fork();
-if (pid == 0)
-{
 token = strtok(line, " ");
 while (token)
 {
@@ -48,6 +40,13 @@ argv[i++] = token;
 token = strtok(NULL, " ");
 }
 argv[i] = NULL;
+if (argv[0] == NULL)
+{
+continue;
+}
+pid = fork();
+if (pid == 0)
+{
 execve(argv[0], argv, NULL);
 free(line);
 exit(127);
@@ -56,9 +55,7 @@ else
 {
 wait(&status);
 if (WIFEXITED(status))
-{
-exit_status = WEXITSTATUS(status);
-}
+    exit_status = WEXITSTATUS(status);
 }
 }
 free(line);
