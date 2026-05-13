@@ -8,19 +8,24 @@
 
 /**
  * main - entry point
+ * @ac: int
+ * @av: char
  * Return: always (0) success
  */
-int main()
+int main(int ac, char **av)
 {
 pid_t pid;
 ssize_t read;
-char *line = NULL;
 size_t len = 0;
 char *argv[64];
 char *token;
 int status;
-int exit_status = 0;
 int i;
+char full_path[1024];
+int exit_status = 0;
+char *line = NULL;
+
+
 while (1)
 {
 i = 0;
@@ -52,6 +57,12 @@ continue;
 pid = fork();
 if (pid == 0)
 {
+if (argv[0][0] != '/')
+{
+strcpy(full_path, "/bin/");
+strcat(full_path,argv[0]);
+argv[0] = full_path;
+}
 execve(argv[0], argv, NULL);
 free(line);
 exit(127);
