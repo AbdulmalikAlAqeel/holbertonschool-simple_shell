@@ -6,12 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern char **environ;
+
 char *find_in_path(char *cmd);
 
 int main(void)
 {
     pid_t pid;
-    ssize_t read;
+    ssize_t nread;
     size_t len = 0;
     char *argv[64];
     char *token;
@@ -28,8 +30,8 @@ int main(void)
             printf("$ ");
             fflush(stdout);
         }
-        read = getline(&line, &len, stdin);
-        if (read == -1)
+        nread = getline(&line, &len, stdin);
+        if (nread == -1)
         {
             if (isatty(STDIN_FILENO))
                 printf("\n");
@@ -47,6 +49,7 @@ int main(void)
         argv[i] = NULL;
         if (argv[0] == NULL)
             continue;
+
         if (argv[0][0] != '/' && argv[0][0] != '.')
         {
             char *cmd_path = find_in_path(argv[0]);
@@ -65,6 +68,7 @@ int main(void)
                 continue;
             }
         }
+
         pid = fork();
         if (pid == -1)
         {
@@ -103,14 +107,28 @@ int main(void)
 
 char *find_in_path(char *cmd)
 {
-    char *path = getenv("PATH");
+    char *path = NULL;
+    int i = 0;
     char *copy;
     char *dir;
+
+    while (environ[i])
+    {
+        if (strncmp(environ[i], "PATH=", 5) == 0)
+        {
+            path = environ[i] + 5;
+            break;
+        }
+        i++;
+    }
+
     if (path == NULL || path[0] == '\0')
         return NULL;
+
     copy = strdup(path);
     if (copy == NULL)
         return NULL;
+
     dir = strtok(copy, ":");
     while (dir)
     {
