@@ -10,15 +10,12 @@ extern char **environ;
 
 /* Function Prototypes */
 char *find_in_path(char *cmd);
-void execute_command(char **argv, int line_num, char *line);
+int execute_command(char **argv, int line_num, char *line);
 
 /**
  * main - Entry point for the simple shell.
  * 
- * Description: Reads user input, parses it, checks for built-ins
- * like 'exit', and executes external commands found in PATH.
- * 
- * Return: Always 0 (Success).
+ * Return: The last command's exit status.
  */
 int main(void)
 {
@@ -27,61 +24,60 @@ int main(void)
 	ssize_t nread;
 	char *argv[64];
 	int i, line_num = 0;
+	int last_status = 0; /* To track the exit code of commands */
 
 	while (1)
 	{
 		line_num++;
-		/* Print prompt only in interactive mode */
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "$ ", 2);
 
 		nread = getline(&line, &len, stdin);
-		if (nread == -1) /* Handle Ctrl+D (EOF) */
+		if (nread == -1)
 		{
 			if (isatty(STDIN_FILENO))
 				write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
 
-		/* Remove newline character from input */
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
 
-		/* Tokenize input string into arguments */
 		i = 0;
 		argv[i] = strtok(line, " ");
 		while (argv[i] && i < 63)
 			argv[++i] = strtok(NULL, " ");
 
-		if (argv[0] == NULL) /* Handle empty input */
+		if (argv[0] == NULL)
 			continue;
 
-		/* TASK 0.4: Implement 'exit' built-in */
+		/* TASK 0.4: exit with the last command's status */
 		if (strcmp(argv[0], "exit") == 0)
 		{
-			free(line); /* Clean memory before exiting */
-			exit(0);
+			free(line);
+			exit(last_status);
 		}
 
-		execute_command(argv, line_num, line);
+		last_status = execute_command(argv, line_num, line);
 	}
 	free(line);
-	return (0);
+	return (last_status);
 }
 
 /**
- * execute_command - Forks a child process and executes a command.
- * @argv: Array of arguments (the command and its flags).
- * @line_num: The count of commands entered (for error reporting).
- * @line: The input buffer to free in the child process if execve fails.
+ * execute_command - Executes command and returns its exit status.
+ * @argv: Arguments array.
+ * @line_num: Line number for errors.
+ * @line: Input buffer.
+ * 
+ * Return: Exit status of the command.
  */
-void execute_command(char **argv, int line_num, char *line)
+int execute_command(char **argv, int line_num, char *line)
 {
 	pid_t pid;
 	char *cmd_path = NULL;
-	int status;
+	int status, exit_code = 0;
 
-	/* Determine if command is a full path or needs PATH search */
 	if (argv[0][0] != '/' && argv[0][0] != '.')
 		cmd_path = find_in_path(argv[0]);
 	else if (access(argv[0], X_OK) == 0)
@@ -90,37 +86,39 @@ void execute_command(char **argv, int line_num, char *line)
 	if (cmd_path == NULL)
 	{
 		fprintf(stderr, "./hsh: %d: %s: not found\n", line_num, argv[0]);
-		return;
+		return (127); /* Command not found status */
 	}
 
 	pid = fork();
-	if (pid == 0) /* Child Process */
+	if (pid == 0) /* Child */
 	{
 		if (execve(cmd_path, argv, environ) == -1)
 		{
-			perror("execve");
 			free(cmd_path);
 			free(line);
 			exit(127);
 		}
 	}
-	else if (pid < 0) /* Fork failed */
+	else if (pid < 0)
 	{
 		perror("fork");
 		free(cmd_path);
+		return (1);
 	}
-	else /* Parent Process */
+	else /* Parent */
 	{
 		wait(&status);
+		if (WIFEXITED(status))
+			exit_code = WEXITSTATUS(status);
 		free(cmd_path);
 	}
+	return (exit_code);
 }
 
 /**
- * find_in_path - Searches for a command in the PATH environment variable.
- * @cmd: The command to find (e.g., "ls").
- * 
- * Return: The full path to the executable if found, or NULL.
+ * find_in_path - Searches PATH for command.
+ * @cmd: command name.
+ * Return: Full path or NULL.
  */
 char *find_in_path(char *cmd)
 {
@@ -128,7 +126,6 @@ char *find_in_path(char *cmd)
 	int i = 0;
 	struct stat st;
 
-	/* Locate PATH in environment variables */
 	while (environ[i])
 	{
 		if (strncmp(environ[i], "PATH=", 5) == 0)
@@ -138,7 +135,6 @@ char *find_in_path(char *cmd)
 		}
 		i++;
 	}
-
 	if (!path || path[0] == '\0')
 		return (NULL);
 
@@ -146,11 +142,9 @@ char *find_in_path(char *cmd)
 	dir = strtok(copy, ":");
 	while (dir)
 	{
-		/* Allocate space for: dir + '/' + cmd + '\0' */
 		full = malloc(strlen(dir) + strlen(cmd) + 2);
 		sprintf(full, "%s/%s", dir, cmd);
-
-		if (stat(full, &st) == 0) /* Check if file exists */
+		if (stat(full, &st) == 0)
 		{
 			free(copy);
 			return (full);
