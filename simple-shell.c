@@ -20,7 +20,6 @@ char *argv[64];
 char *token;
 int status;
 int i;
-char full_path[1024];
 int exit_status = 0;
 char *line = NULL;
 
