@@ -19,7 +19,10 @@ char *line = NULL;
 size_t len = 0;
 while (true)
 {
+if (!isatty(STDIN_FILENO))
+{
 printf("$ ");   
+}
 read = getline(&line, &len, stdin);
 if (read == -1)
 {
@@ -53,5 +56,6 @@ wait(NULL);
 }
 
 }
+free(line);
 return (0);
 }
