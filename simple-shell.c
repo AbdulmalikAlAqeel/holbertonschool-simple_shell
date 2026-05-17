@@ -8,14 +8,12 @@
 
 extern char **environ;
 
-/* Function Prototypes */
 char *find_in_path(char *cmd);
 int execute_command(char **argv, int line_num, char *line);
 void print_env(void);
 
 /**
  * main - Entry point for the simple shell.
- * 
  * Return: Exit status of the last executed command.
  */
 int main(void)
@@ -33,7 +31,7 @@ int main(void)
 			write(STDOUT_FILENO, "$ ", 2);
 
 		nread = getline(&line, &len, stdin);
-		if (nread == -1) /* Handle EOF (Ctrl+D) */
+		if (nread == -1)
 		{
 			if (isatty(STDIN_FILENO))
 				write(STDOUT_FILENO, "\n", 1);
@@ -94,7 +92,6 @@ void print_env(void)
  * @argv: Array of arguments.
  * @line_num: Command count for error messages.
  * @line: Input buffer to free in child if execve fails.
- * 
  * Return: Exit status of the command.
  */
 int execute_command(char **argv, int line_num, char *line)
@@ -143,7 +140,6 @@ int execute_command(char **argv, int line_num, char *line)
 /**
  * find_in_path - Searches for a command in PATH directories.
  * @cmd: The command to find.
- * 
  * Return: Full path to command if found, NULL otherwise.
  */
 char *find_in_path(char *cmd)
