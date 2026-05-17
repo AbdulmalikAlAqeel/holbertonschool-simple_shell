@@ -1,0 +1,87 @@
+.TH SIMPLE_SHELL 1 "May 2026" "Simple Shell Project" "User Commands"
+
+.SH NAME
+simple_shell \- simple UNIX command line interpreter
+
+.SH SYNOPSIS
+.B ./simple_shell
+
+.SH DESCRIPTION
+Simple Shell is a minimal UNIX command line interpreter written in C.
+
+It reads commands from standard input, parses them, and executes them using system calls such as fork, execve, and wait.
+
+The shell supports:
+- Execution of commands
+- PATH resolution
+- Built-in commands (exit, env)
+- Handling of arguments
+- Interactive and non-interactive modes
+
+.SH USAGE
+
+Interactive mode:
+.PP
+.nf
+$ ./simple_shell
+$ ls
+$ pwd
+$ exit
+.fi
+
+Non-interactive mode:
+.PP
+.nf
+echo "ls -l" | ./simple_shell
+.fi
+
+.SH BUILT-IN COMMANDS
+
+.TP
+.B exit
+Exit the shell. No arguments are required.
+
+.TP
+.B env
+Print the current environment variables.
+
+.SH FEATURES
+
+- Executes commands using execve
+- Searches PATH for executable files
+- Handles command arguments
+- Displays prompt in interactive mode
+- Handles EOF (Ctrl+D)
+- Avoids forking if command is not found
+
+.SH ERROR HANDLING
+
+If a command is not found, the shell prints:
+
+.nf
+./simple_shell: command: not found
+.fi
+
+The shell returns exit status 127 in this case.
+
+.SH RETURN VALUE
+Returns the exit status of the last executed command.
+
+.SH EXAMPLES
+
+.nf
+$ ls
+$ /bin/ls -l
+$ env
+$ exit
+.fi
+
+.SH ENVIRONMENT
+The shell uses the global variable:
+.B extern char **environ;
+
+.SH AUTHOR
+AZZAM AL DUULI && ABDULMALIK BIN AQEEL
+
+.SH SEE ALSO
+bash(1), sh(1), execve(2), fork(2), wait(2)
