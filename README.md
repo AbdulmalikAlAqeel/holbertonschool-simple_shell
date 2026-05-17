@@ -1,4 +1,4 @@
-# 🐚 Simple Shell
+#  Simple Shell
 
 A UNIX command line interpreter written in C.
 
