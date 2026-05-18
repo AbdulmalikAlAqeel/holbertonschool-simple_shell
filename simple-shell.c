@@ -5,9 +5,12 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
+
 
 extern char **environ;
 
+void handle_sigint(int sig);
 char *find_in_path(char *cmd);
 int execute_command(char **argv, int line_num, char *line);
 void print_env(void);
@@ -24,6 +27,7 @@ int main(void)
 	char *argv[64];
 	int i, line_num = 0, last_status = 0;
 
+	signal(SIGINT, handle_sigint);
 	while (1)
 	{
 		line_num++;
@@ -176,4 +180,16 @@ char *find_in_path(char *cmd)
 	}
 	free(copy);
 	return (NULL);
+}
+
+/**
+ * handle_sigint - Prints all environment variables to stdout.
+ * @sig: int value
+ * Description: Iterates through the global 'environ' array
+ * and writes each string followed by a newline.
+ */
+void handle_sigint(int sig)
+{
+    (void)sig;
+    write(STDOUT_FILENO, "^C", 2);
 }
