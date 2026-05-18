@@ -26,14 +26,12 @@ int main(void)
 	ssize_t nread;
 	char *argv[64];
 	int i, line_num = 0, last_status = 0;
-
 	signal(SIGINT, handle_sigint);
 	while (1)
 	{
 		line_num++;
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "$ ", 2);
-
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
@@ -41,32 +39,34 @@ int main(void)
 				write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
-
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
-
 		i = 0;
 		argv[i] = strtok(line, " ");
 		while (argv[i] && i < 63)
 			argv[++i] = strtok(NULL, " ");
-
 		if (argv[0] == NULL)
 			continue;
-
-		/* TASK 0.4: Handle exit built-in */
 		if (strcmp(argv[0], "exit") == 0)
 		{
 			free(line);
 			exit(last_status);
 		}
-		/* TASK 1.0: Handle env built-in */
 		else if (strcmp(argv[0], "env") == 0)
 		{
 			print_env();
 			last_status = 0;
 			continue;
 		}
-
+		else if (strcmp(argv[0], "help") == 0)
+		{
+			write(STDOUT_FILENO,
+			"Simple Shell Built-ins:\n"
+			"  exit  - Exit the shell\n"
+			"  env   - Print environment variables\n"
+			"  help  - Display help information\n",
+			123);
+		}
 		last_status = execute_command(argv, line_num, line);
 	}
 	free(line);
