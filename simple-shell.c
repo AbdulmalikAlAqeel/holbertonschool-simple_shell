@@ -191,5 +191,4 @@ char *find_in_path(char *cmd)
 void handle_sigint(int sig)
 {
     (void)sig;
-    write(STDOUT_FILENO, "^C", 2);
 }
